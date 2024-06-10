@@ -8,6 +8,7 @@ use App\Interfaces\SubmissionRepoInterface;
 use App\Classes\ApiResponseClass;
 use App\Http\Resources\SubmissionResource;
 use Illuminate\Support\Facades\DB;
+use App\Jobs\SaveSubmissionJob;
 
 class SubmissionController extends Controller
 {
@@ -29,12 +30,10 @@ class SubmissionController extends Controller
             'email' => $request->email,
             'message' => $request->message
         ];
-        DB::beginTransaction();
+        
         try {
-            $submission = $this->submissionRepoInterface->store($details);
-
-            DB::commit();
-            return ApiResponseClass::sendResponse(new SubmissionResource($submission), 'Submission Created Successful', 201);
+            SaveSubmissionJob::dispatch($details['name'], $details['email'], $details['message'], $this->submissionRepoInterface)->delay(now()->addMinute());
+            return ApiResponseClass::sendResponse([], 'Submission Created Successful', 201); // new SubmissionResource($submission)
         } catch (\Exception $ex) {
             return ApiResponseClass::rollback($ex);
         }

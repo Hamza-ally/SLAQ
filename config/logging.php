@@ -127,6 +127,12 @@ return [
             'path' => storage_path('logs/laravel.log'),
         ],
 
+        'submission' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/submissionLogs.log'),
+            'level' => 'info', // Adjust the log level if needed
+        ],
+
     ],
 
 ];
